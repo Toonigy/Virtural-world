@@ -1,59 +1,73 @@
-const canvas = document.getElementById('gameCanvas');
+const canvas = document.getElementById('townCanvas');
 const ctx = canvas.getContext('2d');
-
-// Retrieve username using getUsername() from auth.js
-const username = getUsername();
 
 // Avatar properties
 const avatar = {
     x: canvas.width / 2,
-    y: canvas.height / 2,
+    y: canvas.height / 1.5,
     width: 50,
     height: 80,
-    headRadius: 20,
-    speed: 2,  // Movement speed
-    destination: { x: canvas.width / 2, y: canvas.height / 2 }  // Default destination at the starting point
+    speed: 3,
+    destination: { x: canvas.width / 2, y: canvas.height / 1.5 }
 };
 
-// Draw the avatar and username
-function drawAvatar() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+// Town boundaries
+const boundaries = {
+    xMin: 50,
+    xMax: canvas.width - 50,
+    yMin: 100,
+    yMax: canvas.height - 100
+};
 
-    // Body
-    ctx.fillStyle = '#4CAF50';
-    ctx.fillRect(avatar.x - avatar.width / 2, avatar.y, avatar.width, avatar.height);
+// Sample buildings/interactive areas
+const buildings = [
+    { x: 100, y: 200, width: 100, height: 150, label: "Shop" },
+    { x: 300, y: 100, width: 150, height: 200, label: "Library" },
+    { x: 700, y: 200, width: 100, height: 150, label: "Café" }
+];
 
-    // Head
-    ctx.fillStyle = '#FFDAB9';
-    ctx.beginPath();
-    ctx.arc(avatar.x, avatar.y - avatar.headRadius - 10, avatar.headRadius, 0, Math.PI * 2);
-    ctx.fill();
+// Draw the town background and buildings
+function drawTown() {
+    ctx.fillStyle = '#87CEEB'; // Sky color
+    ctx.fillRect(0, 0, canvas.width, canvas.height / 2);
 
-    // Eyes
-    ctx.fillStyle = '#000';
-    ctx.beginPath();
-    ctx.arc(avatar.x - 8, avatar.y - avatar.headRadius - 10, 3, 0, Math.PI * 2);
-    ctx.arc(avatar.x + 8, avatar.y - avatar.headRadius - 10, 3, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillStyle = '#228B22'; // Ground color
+    ctx.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
 
-    // Mouth
-    ctx.strokeStyle = '#000';
-    ctx.beginPath();
-    ctx.arc(avatar.x, avatar.y - avatar.headRadius, 8, 0, Math.PI);
-    ctx.stroke();
+    buildings.forEach(building => {
+        ctx.fillStyle = '#8B4513'; // Building color
+        ctx.fillRect(building.x, building.y, building.width, building.height);
 
-    // Username
-    ctx.fillStyle = '#000';
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(username, avatar.x, avatar.y + avatar.height + 20);  // Display below the avatar
+        ctx.fillStyle = '#FFF';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(building.label, building.x + building.width / 2, building.y + building.height + 20);
+    });
 }
 
-// Handle canvas clicks to set a new destination for the avatar
+// Draw the avatar
+function drawAvatar() {
+    ctx.fillStyle = '#FFDAB9'; // Skin color for head
+    ctx.beginPath();
+    ctx.arc(avatar.x, avatar.y - avatar.height / 2, 20, 0, Math.PI * 2); // Head
+    ctx.fill();
+
+    ctx.fillStyle = '#4CAF50'; // Body color
+    ctx.fillRect(avatar.x - 15, avatar.y - avatar.height / 2 + 20, 30, avatar.height - 20); // Body
+}
+
+// Handle canvas clicks to set new destination
 canvas.addEventListener('click', (event) => {
     const rect = canvas.getBoundingClientRect();
-    avatar.destination.x = event.clientX - rect.left;
-    avatar.destination.y = event.clientY - rect.top;
+    const destinationX = event.clientX - rect.left;
+    const destinationY = event.clientY - rect.top;
+
+    // Check if within boundaries
+    if (destinationX > boundaries.xMin && destinationX < boundaries.xMax &&
+        destinationY > boundaries.yMin && destinationY < boundaries.yMax) {
+        avatar.destination.x = destinationX;
+        avatar.destination.y = destinationY;
+    }
 });
 
 // Move the avatar towards the destination
@@ -66,16 +80,19 @@ function updateAvatarPosition() {
         avatar.x += (dx / distance) * avatar.speed;
         avatar.y += (dy / distance) * avatar.speed;
     } else {
-        // If the avatar is close to the destination, snap to the destination
         avatar.x = avatar.destination.x;
         avatar.y = avatar.destination.y;
     }
 }
 
-// Game loop to update and draw the avatar
+// Game loop to update and draw the town and avatar
 function gameLoop() {
-    updateAvatarPosition();
-    drawAvatar();
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+
+    drawTown();   // Draw town background and buildings
+    drawAvatar(); // Draw the avatar
+    updateAvatarPosition(); // Update avatar position towards destination
+
     requestAnimationFrame(gameLoop);
 }
 
