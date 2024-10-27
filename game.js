@@ -1,6 +1,9 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+// Retrieve username from local storage, or use "???" if not signed in
+const username = localStorage.getItem('username') || '???';
+
 // Avatar properties
 const avatar = {
     x: canvas.width / 2,
@@ -12,7 +15,7 @@ const avatar = {
     destination: { x: canvas.width / 2, y: canvas.height / 2 }  // Default destination at the starting point
 };
 
-// Draw the avatar
+// Draw the avatar and username
 function drawAvatar() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -38,6 +41,12 @@ function drawAvatar() {
     ctx.beginPath();
     ctx.arc(avatar.x, avatar.y - avatar.headRadius, 8, 0, Math.PI);
     ctx.stroke();
+
+    // Username
+    ctx.fillStyle = '#000';
+    ctx.font = '16px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(username, avatar.x, avatar.y + avatar.height + 20);  // Display below the avatar
 }
 
 // Handle canvas clicks to set a new destination for the avatar
