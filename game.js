@@ -1,8 +1,8 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// Retrieve username from local storage, or use "???" if not signed in
-const username = localStorage.getItem('username') || '???';
+// Retrieve username using getUsername() from auth.js
+const username = getUsername();
 
 // Avatar properties
 const avatar = {
